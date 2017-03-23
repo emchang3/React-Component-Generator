@@ -10,8 +10,7 @@ import (
 
 /*
 To-Do:
-- Convert props to a flag.
-- Accommodate multiple imports.
+- Figure out how to handle nested proptypes (e.g.: shape).
 */
 
 func writeClass(w *bufio.Writer, name string) {
@@ -46,7 +45,7 @@ func writeFunc(w *bufio.Writer, name string, props []string) {
   w.WriteString(ret)
 }
 
-func writeProptypes(w *bufio.Writer, name string, props []string)  {
+func writeProptypes(w *bufio.Writer, name string, props []string) {
   if props[0] != "" {
     propTypes := fmt.Sprintf("%v.propTypes = {\n", name)
     for _, v := range props {
@@ -59,11 +58,21 @@ func writeProptypes(w *bufio.Writer, name string, props []string)  {
   }
 }
 
+func writeImportStatements(w *bufio.Writer, importStatements []string)  {
+  for _, v := range importStatements {
+    importStatement := strings.Split(v, ":")
+    myImport := fmt.Sprintf("import %v from '%v';\n", importStatement[0], importStatement[1])
+    w.WriteString(myImport)
+  }
+  w.WriteString("\n")
+}
+
 func main() {
   fmt.Println("世界好！")
-  name := flag.String("name", "MyComponent", "Component name.")
   file := flag.String("file", "myComponent.js", "File name.")
+  imports := flag.String("imports", "React:react", "Imports.")
   mode := flag.String("mode", "func", "Function or class.")
+  name := flag.String("name", "MyComponent", "Component name.")
   proptypes := flag.String("props", "", "prop:type,prop:type")
 
   flag.Parse()
@@ -84,8 +93,8 @@ func main() {
 
   w := bufio.NewWriter(fo)
 
-  imports := "import React from 'react';\n\n"
-  w.WriteString(imports)
+  importStatements := strings.Split(*imports, ",")
+  writeImportStatements(w, importStatements)
 
   if *mode == "class" {
     writeClass(w, *name)
