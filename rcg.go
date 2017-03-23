@@ -69,6 +69,7 @@ func writeImportStatements(w *bufio.Writer, importStatements []string)  {
 
 func main() {
   fmt.Println("世界好！")
+  
   file := flag.String("file", "myComponent.js", "File name.")
   imports := flag.String("imports", "React:react", "Imports.")
   mode := flag.String("mode", "func", "Function or class.")
@@ -78,6 +79,7 @@ func main() {
   flag.Parse()
 
   props := strings.Split(*proptypes, ",")
+  importStatements := strings.Split(*imports, ",")
 
   fo, err := os.Create(*file)
   if err != nil {
@@ -93,12 +95,11 @@ func main() {
 
   w := bufio.NewWriter(fo)
 
-  importStatements := strings.Split(*imports, ",")
   writeImportStatements(w, importStatements)
 
   if *mode == "class" {
     writeClass(w, *name)
-  } else {
+  } else { // "func"
     writeFunc(w, *name, props)
   }
 
